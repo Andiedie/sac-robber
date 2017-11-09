@@ -1,0 +1,19 @@
+{
+  "name": "sac-robber",
+  "version": "1.0.0",
+  "description": "新活抢班程序",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andiedie/sac-robber.git"
+  },
+  "author": "Andie <zchangan@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Andiedie/sac-robber/issues"
+  },
+  "homepage": "https://github.com/Andiedie/sac-robber#readme"
+}
