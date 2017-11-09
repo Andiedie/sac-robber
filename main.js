@@ -6,6 +6,7 @@ let bot;
 
 let roomId;
 let myId;
+let lastId;
 
 try {
   bot = new Wechat(require('./sync-data.json'));
@@ -39,7 +40,7 @@ bot.on('logout', () => {
 
 bot.on('contacts-updated', contacts => {
   for (const one of contacts) {
-    if (one.isRoomContact() && one.NickName === config.groupName && roomId !== one.UserName) {
+    if (one.NickName === config.groupName && roomId !== one.UserName) {
       roomId = one.UserName;
       console.log('更新群ID为：', roomId);
     }
@@ -55,11 +56,30 @@ bot.on('error', err => {
 });
 
 bot.on('message', msg => {
-  if (msg.FromUserName === roomId) {
+  if (msg.FromUserName === roomId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
     const isShuaiBan = /甩.*第[一二三四五12345]/.test(msg.Content);
     if (isShuaiBan) {
       bot.sendMsg(config.jie[Math.floor(Math.random() * config.jie.length)], roomId)
-        .then(() => bot.sendMsg(msg.Content, myId))
+        .then(res => {
+          lastId = res.MsgID;
+          return bot.sendMsg(msg.Content, myId);
+        })
+        .catch(err => {
+          bot.emit('error', err);
+        });
+    }
+  } else if (msg.FromUserName === myId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
+    if (msg.Content === config.revokeCommand) {
+      let isOK = true;
+      bot.revokeMsg(lastId, roomId)
+        .catch(err => {
+          bot.emit('error', err);
+          isOK = false;
+          return bot.sendMsg('撤回失败', myId);
+        })
+        .then(res => {
+          return bot.sendMsg(isOK ? '撤回成功' : '撤回失败', myId);
+        })
         .catch(err => {
           bot.emit('error', err);
         });
