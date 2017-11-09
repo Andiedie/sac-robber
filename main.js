@@ -9,7 +9,7 @@ let myId;
 let lastId;
 
 try {
-  bot = new Wechat(require('./sync-data.json'));
+  bot = new Wechat(require('./data.json'));
 } catch (e) {
   bot = new Wechat();
 }
@@ -28,7 +28,7 @@ bot.on('uuid', uuid => {
 
 bot.on('login', () => {
   console.log('登录成功');
-  fs.writeFileSync('./sync-data.json', JSON.stringify(bot.botData));
+  fs.writeFileSync('./data.json', JSON.stringify(bot.botData));
 });
 
 bot.on('logout', () => {
