@@ -56,33 +56,40 @@ bot.on('error', err => {
 });
 
 bot.on('message', msg => {
-  if (msg.FromUserName === roomId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
-    const isShuaiBan = /甩.*第[一二三四五12345]/.test(msg.Content);
-    if (isShuaiBan) {
-      bot.sendMsg(config.jie[Math.floor(Math.random() * config.jie.length)], roomId)
-        .then(res => {
-          lastId = res.MsgID;
-          return bot.sendMsg(msg.Content, myId);
-        })
-        .catch(err => {
-          bot.emit('error', err);
-        });
+  if (config.rob) {
+    if (msg.FromUserName === roomId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
+      const isShuaiBan = /甩.*第[一二三四五12345]/.test(msg.Content);
+      if (isShuaiBan) {
+        bot.sendMsg(config.jie[Math.floor(Math.random() * config.jie.length)], roomId)
+          .then(res => {
+            lastId = res.MsgID;
+            return bot.sendMsg(msg.Content, myId);
+          })
+          .catch(err => {
+            bot.emit('error', err);
+          });
+      }
+    } else if (msg.FromUserName === myId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
+      if (msg.Content === config.revokeCommand) {
+        let isOK = true;
+        bot.revokeMsg(lastId, roomId)
+          .catch(err => {
+            bot.emit('error', err);
+            isOK = false;
+            return bot.sendMsg('撤回失败', myId);
+          })
+          .then(res => {
+            return bot.sendMsg(isOK ? '撤回成功' : '撤回失败', myId);
+          })
+          .catch(err => {
+            bot.emit('error', err);
+          });
+      }
     }
-  } else if (msg.FromUserName === myId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
-    if (msg.Content === config.revokeCommand) {
-      let isOK = true;
-      bot.revokeMsg(lastId, roomId)
-        .catch(err => {
-          bot.emit('error', err);
-          isOK = false;
-          return bot.sendMsg('撤回失败', myId);
-        })
-        .then(res => {
-          return bot.sendMsg(isOK ? '撤回成功' : '撤回失败', myId);
-        })
-        .catch(err => {
-          bot.emit('error', err);
-        });
-    }
+  } else {
+    bot.sendMsg(msg.Content, myId)
+      .catch(err => {
+        bot.emit('error', err);
+      });
   }
 });
