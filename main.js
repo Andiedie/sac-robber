@@ -21,9 +21,7 @@ if (bot.PROP.uin) {
 }
 
 bot.on('uuid', uuid => {
-  qrcode.generate('https://login.weixin.qq.com/l/' + uuid, {
-    small: true
-  });
+  qrcode.generate('https://login.weixin.qq.com/l/' + uuid);
 });
 
 bot.on('login', () => {
@@ -34,7 +32,7 @@ bot.on('login', () => {
 bot.on('logout', () => {
   console.log('已登出');
   try {
-    fs.unlinkSync('./sync-data.json');
+    fs.unlinkSync('./data.json');
   } catch (e) {}
 });
 
