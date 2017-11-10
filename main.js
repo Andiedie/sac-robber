@@ -52,7 +52,7 @@ bot.on('contacts-updated', contacts => {
 });
 
 bot.on('error', err => {
-  console.error('错误：', err.message);
+  console.error(`${new Date()}错误：${err.message}`);
 });
 
 bot.on('message', msg => {
