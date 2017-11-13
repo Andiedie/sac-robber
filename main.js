@@ -54,7 +54,7 @@ bot.on('error', err => {
 
 bot.on('message', msg => {
   if (msg.FromUserName === roomId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
-    const isShuaiBan = /甩.*第[一二三四五12345]/.test(msg.Content);
+    const isShuaiBan = /\n.{0,2}甩.*第[一二三四五12345]班?$/.test(msg.Content);
     if (isShuaiBan) {
       if (config.rob) {
         bot.sendMsg(config.jie[Math.floor(Math.random() * config.jie.length)], roomId)
