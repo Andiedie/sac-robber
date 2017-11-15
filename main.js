@@ -2,6 +2,7 @@ const Wechat = require('wechat4u');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const config = require('./config');
+config.rob = process.argv[2] === 'rob' ? true : config.rob;
 let bot;
 
 let roomId;
