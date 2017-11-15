@@ -2,6 +2,7 @@ const Wechat = require('wechat4u');
 const fs = require('fs');
 const config = require('./config');
 config.rob = process.argv[2] === 'rob' ? true : config.rob;
+console.log(config.rob ? '启动抢班' : '关闭抢班');
 let bot;
 
 let roomId;
