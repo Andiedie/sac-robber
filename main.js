@@ -1,5 +1,4 @@
 const Wechat = require('wechat4u');
-const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const config = require('./config');
 config.rob = process.argv[2] === 'rob' ? true : config.rob;
@@ -21,6 +20,7 @@ if (bot.PROP.uin) {
 }
 
 bot.on('uuid', uuid => {
+  const qrcode = require('qrcode-terminal');
   qrcode.generate('https://login.weixin.qq.com/l/' + uuid);
 });
 
@@ -34,6 +34,7 @@ bot.on('logout', () => {
   try {
     fs.unlinkSync('./data.json');
   } catch (e) {}
+  bot = new Wechat();
 });
 
 bot.on('contacts-updated', contacts => {
