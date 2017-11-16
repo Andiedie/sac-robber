@@ -67,7 +67,7 @@ bot.on('message', async msg => {
           bot.emit('error', err);
         }
       }
-      informMe(msg.Content);
+      await informMe(msg.Content);
     }
   }
 });
