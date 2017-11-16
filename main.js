@@ -55,24 +55,30 @@ bot.on('error', err => {
   console.error(`${new Date()}错误：${err.message}`);
 });
 
-bot.on('message', msg => {
+bot.on('message', async msg => {
   if (msg.FromUserName === roomId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
-    const isShuaiBan = /\n.{0,2}甩.*第[一二三四五12345]班?$/.test(msg.Content);
+    const isShuaiBan = /\n.甩.*第[一二三四五12345]班?$/.test(msg.Content);
     if (isShuaiBan) {
       if (config.rob) {
-        bot.sendMsg(config.jie[Math.floor(Math.random() * config.jie.length)], roomId)
-          .then(res => {
-            return bot.sendMsg(msg.Content, myId);
-          })
-          .catch(err => {
-            bot.emit('error', err);
-          });
-      } else {
-        bot.sendMsg(msg.Content, myId)
-          .catch(err => {
-            bot.emit('error', err);
-          });
+        const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
+        try {
+          await bot.sendMsg(randomJie, roomId);
+        } catch (err) {
+          bot.emit('error', err);
+        }
       }
+      informMe(msg.Content);
     }
   }
 });
+
+async function informMe (msg) {
+  try {
+    for (let i = 0; i < config.informTimes; i++) {
+      await bot.sendMsg(msg, myId);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  } catch (err) {
+    bot.emit('error', err);
+  }
+}
