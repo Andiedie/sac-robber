@@ -56,29 +56,40 @@ bot.on('error', err => {
 });
 
 bot.on('message', async msg => {
-  if (msg.FromUserName === roomId && msg.MsgType === bot.CONF.MSGTYPE_TEXT) {
+  if (msg.MsgType !== bot.CONF.MSGTYPE_TEXT) return;
+  if (msg.FromUserName === roomId) {
     const isShuaiBan = /\n甩.*第[一二三四五12345]班?$/.test(msg.Content);
     if (isShuaiBan) {
       if (config.rob) {
         const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
-        try {
-          await bot.sendMsg(randomJie, roomId);
-        } catch (err) {
-          bot.emit('error', err);
-        }
+        send(randomJie, roomId);
       }
       await informMe(msg.Content);
+    }
+  } else if (msg.FromUserName === myId) {
+    if (msg.Content === config.startRob) {
+      config.rob = true;
+      send('开启抢班', myId);
+      console.log('开启抢班');
+    } else if (msg.Content === config.endRob) {
+      config.rob = false;
+      send('关闭抢班', myId);
+      console.log('开启抢班');
     }
   }
 });
 
-async function informMe (msg) {
+async function send (what, who) {
   try {
-    for (let i = 0; i < config.informTimes; i++) {
-      await bot.sendMsg(msg, myId);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    await bot.sendMsg(what, who);
   } catch (err) {
     bot.emit('error', err);
+  }
+}
+
+async function informMe (msg) {
+  for (let i = 0; i < config.informTimes; i++) {
+    await send(msg, myId);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 }

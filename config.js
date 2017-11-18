@@ -6,5 +6,9 @@ module.exports = {
   // 是否自动抢班
   rob: false,
   // 通知次数
-  informTimes: 10
+  informTimes: 10,
+  // 开启抢班的微信消息
+  startRob: 's',
+  // 关闭抢班的微信消息
+  endRob: 'e'
 };
