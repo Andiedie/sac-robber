@@ -74,7 +74,7 @@ bot.on('message', async msg => {
     } else if (msg.Content === config.endRob) {
       config.rob = false;
       send('关闭抢班', myId);
-      console.log('开启抢班');
+      console.log('关闭抢班');
     }
   }
 });
