@@ -40,7 +40,7 @@ bot.on('logout', () => {
 
 bot.on('contacts-updated', contacts => {
   for (const one of contacts) {
-    if (one.NickName === config.groupName && roomId !== one.UserName) {
+    if (one.NickName === config.roomName && roomId !== one.UserName) {
       roomId = one.UserName;
       console.log('更新群ID为：', roomId);
     }
@@ -56,8 +56,8 @@ bot.on('error', err => {
 });
 
 bot.on('message', async msg => {
-  if (msg.MsgType !== bot.CONF.MSGTYPE_TEXT) return;
   if (msg.FromUserName === roomId) {
+    if (msg.MsgType !== bot.CONF.MSGTYPE_TEXT) return;
     msg.Content = msg.Content.substr(msg.Content.indexOf('\n') + 1);
     msgFromGroup(msg);
   } else if (msg.FromUserName === myId) {
@@ -96,20 +96,45 @@ async function msgFromGroup (msg) {
 }
 
 async function msgFromMe (msg) {
-  if (msg.Content === config.startRob) {
-    config.rob = true;
-    send('开启抢班', myId);
-    console.log('开启抢班');
-  } else if (msg.Content === config.endRob) {
-    config.rob = false;
-    send('关闭抢班', myId);
-    console.log('关闭抢班');
+  switch (msg.Content) {
+    case config.startRob:
+      config.rob = true;
+      await send('开启抢班', myId);
+      console.log('开启抢班');
+      break;
+    case config.endRob:
+      config.rob = false;
+      send('关闭抢班', myId);
+      console.log('关闭抢班');
+      break;
+    case config.startForward:
+      config.forward = true;
+      await send('开始转发', myId);
+      console.log('开始转发');
+      break;
+    case config.endForward:
+      config.forward = false;
+      await send('停止转发', myId);
+      console.log('停止转发');
+      break;
+    default:
+      if (config.forward) {
+        await forwardMsg(msg, roomId);
+      }
   }
 }
 
 async function send (what, who) {
   try {
     await bot.sendMsg(what, who);
+  } catch (err) {
+    bot.emit('error', err);
+  }
+}
+
+async function forwardMsg (what, who) {
+  try {
+    await bot.forwardMsg(what, who);
   } catch (err) {
     bot.emit('error', err);
   }
