@@ -58,26 +58,54 @@ bot.on('error', err => {
 bot.on('message', async msg => {
   if (msg.MsgType !== bot.CONF.MSGTYPE_TEXT) return;
   if (msg.FromUserName === roomId) {
-    const isShuaiBan = /\n.*第[一二三四五12345]班?$/.test(msg.Content);
-    if (isShuaiBan) {
-      if (config.rob) {
-        const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
-        send(randomJie, roomId);
-      }
-      await informMe(msg.Content);
-    }
+    msg.Content = msg.Content.substr(msg.Content.indexOf('\n') + 1);
+    msgFromGroup(msg);
   } else if (msg.FromUserName === myId) {
-    if (msg.Content === config.startRob) {
-      config.rob = true;
-      send('开启抢班', myId);
-      console.log('开启抢班');
-    } else if (msg.Content === config.endRob) {
-      config.rob = false;
-      send('关闭抢班', myId);
-      console.log('关闭抢班');
-    }
+    msgFromMe(msg);
   }
 });
+
+async function msgFromGroup (msg) {
+  for (let condition of config.include) {
+    if (condition instanceof RegExp) {
+      if (!condition.test(msg.Content)) {
+        return;
+      }
+    } else if (typeof condition === 'string') {
+      if (!msg.Content.includes(condition)) {
+        return;
+      }
+    }
+  }
+  for (let condition of config.exclude) {
+    if (condition instanceof RegExp) {
+      if (condition.test(msg.Content)) {
+        return;
+      }
+    } else if (typeof condition === 'string') {
+      if (msg.Content.includes(condition)) {
+        return;
+      }
+    }
+  }
+  if (config.rob) {
+    const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
+    send(randomJie, roomId);
+  }
+  await informMe(msg.Content);
+}
+
+async function msgFromMe (msg) {
+  if (msg.Content === config.startRob) {
+    config.rob = true;
+    send('开启抢班', myId);
+    console.log('开启抢班');
+  } else if (msg.Content === config.endRob) {
+    config.rob = false;
+    send('关闭抢班', myId);
+    console.log('关闭抢班');
+  }
+}
 
 async function send (what, who) {
   try {
