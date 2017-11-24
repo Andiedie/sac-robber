@@ -1,8 +1,7 @@
 module.exports = {
-  // roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
-  roomName: 'test',
+  roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
   myName: '节能君',
-  include: [/.*第[一二三四五12345]班?$/],
+  include: [/甩.{0,3}第[一二三四五12345]班?$/],
   exclude: ['换'],
   // 接班语句集合
   jie: ['接', '接了', '接！', '接~', 'jie'],
