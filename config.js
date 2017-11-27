@@ -15,5 +15,6 @@ module.exports = {
   startRob: 'rob',
   endRob: 'no rob',
   startForward: 'forward',
-  endForward: 'no forward'
+  endForward: 'no forward',
+  showStatus: 'status'
 };

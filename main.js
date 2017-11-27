@@ -117,6 +117,9 @@ async function msgFromMe (msg) {
       await send('停止转发', myId);
       console.log('停止转发');
       break;
+    case config.showStatus:
+      await send(`rob: ${config.rob}\nforward: ${config.forward}`, myId);
+      break;
     default:
       if (config.forward) {
         await forwardMsg(msg, roomId);
