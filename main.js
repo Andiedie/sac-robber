@@ -1,170 +1,104 @@
-const Wechat = require('wechat4u');
-const fs = require('fs');
+const wechat = require('./wechat');
 const config = require('./config');
-config.rob = process.argv[2] === 'rob' ? true : config.rob;
-console.log(config.rob ? '启动抢班' : '关闭抢班');
-let bot;
 
-let roomId;
-let myId;
-let lastMsg = {
-  id: null,
-  who: null
-};
-
-try {
-  bot = new Wechat(require('./data.json'));
-} catch (e) {
-  bot = new Wechat();
-}
-
-if (bot.PROP.uin) {
-  bot.restart();
-} else {
-  bot.start();
-}
-
-bot.on('uuid', uuid => {
-  const qrcode = require('qrcode-terminal');
-  qrcode.generate('https://login.weixin.qq.com/l/' + uuid);
-});
-
-bot.on('login', () => {
-  console.log('登录成功');
-  fs.writeFileSync('./data.json', JSON.stringify(bot.botData));
-});
-
-bot.on('logout', () => {
-  console.log('已登出');
-  try {
-    fs.unlinkSync('./data.json');
-  } catch (e) {}
-  bot = new Wechat();
-});
-
-bot.on('contacts-updated', contacts => {
-  for (const one of contacts) {
-    if (one.NickName === config.roomName && roomId !== one.UserName) {
-      roomId = one.UserName;
-      console.log('更新群ID为：', roomId);
+const level = [
+  {
+    include: [/甩.{0,3}第[一二三四五12345]/],
+    exclude: ['换', '吗', '?', '？', '私戳'],
+    action: async msg => {
+      if (config.rob) {
+        const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
+        await wechat.sendToRoom(randomJie);
+      }
+      for (let i = 0; i < 5; i++) {
+        await wechat.sendToMe(msg.Content);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
-    if (one.NickName === config.myName && myId !== one.UserName) {
-      myId = one.UserName;
-      console.log('更新自身ID为：', myId);
+  },
+  {
+    include: [/第[一二三四五]/],
+    exclude: ['换', '私戳'],
+    action: async msg => {
+      await wechat.sendToMe(msg.Content);
     }
   }
-});
+];
 
-bot.on('error', err => {
-  console.error(err.message);
-});
-
-bot.on('message', async msg => {
-  if (msg.FromUserName === roomId) {
-    if (msg.MsgType !== bot.CONF.MSGTYPE_TEXT) return;
+wechat.onMsg(async msg => {
+  if (msg.IsTargetRoom()) {
+    if (msg.MsgType !== wechat.CONF.MSGTYPE_TEXT) return;
     msg.Content = msg.Content.substr(msg.Content.indexOf('\n') + 1);
     msgFromGroup(msg);
-  } else if (msg.FromUserName === myId) {
+  } else if (msg.IsMe()) {
     msgFromMe(msg);
   }
 });
 
 async function msgFromGroup (msg) {
-  for (let condition of config.include) {
-    if (condition instanceof RegExp) {
-      if (!condition.test(msg.Content)) {
-        return;
-      }
-    } else if (typeof condition === 'string') {
-      if (!msg.Content.includes(condition)) {
-        return;
-      }
-    }
-  }
-  for (let condition of config.exclude) {
-    if (condition instanceof RegExp) {
-      if (condition.test(msg.Content)) {
-        return;
-      }
-    } else if (typeof condition === 'string') {
-      if (msg.Content.includes(condition)) {
-        return;
+  let action;
+  outer: for (const one of level) {
+    for (let condition of one.include) {
+      if (condition instanceof RegExp) {
+        if (!condition.test(msg.Content)) {
+          continue outer;
+        }
+      } else if (typeof condition === 'string') {
+        if (!msg.Content.includes(condition)) {
+          continue outer;
+        }
       }
     }
+    for (let condition of one.exclude) {
+      if (condition instanceof RegExp) {
+        if (condition.test(msg.Content)) {
+          continue outer;
+        }
+      } else if (typeof condition === 'string') {
+        if (msg.Content.includes(condition)) {
+          continue outer;
+        }
+      }
+    }
+    action = one.action;
+    break;
   }
-  if (config.rob) {
-    const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
-    send(randomJie, roomId);
+  if (action) {
+    action(msg);
   }
-  await informMe(msg.Content);
 }
 
 async function msgFromMe (msg) {
   switch (msg.Content) {
     case config.startRob:
       config.rob = true;
-      await send('开启抢班', myId);
+      await wechat.sendToMe('开启抢班');
       console.log('开启抢班');
       break;
     case config.endRob:
       config.rob = false;
-      send('关闭抢班', myId);
+      await wechat.sendToMe('关闭抢班');
       console.log('关闭抢班');
       break;
     case config.startForward:
       config.forward = true;
-      await send('开始转发', myId);
+      await wechat.sendToMe('开始转发');
       console.log('开始转发');
       break;
     case config.endForward:
       config.forward = false;
-      await send('停止转发', myId);
+      await wechat.sendToMe('停止转发');
       console.log('停止转发');
       break;
     case config.showStatus:
-      await send(`rob: ${config.rob}\nforward: ${config.forward}`, myId);
+      await wechat.sendToMe(`rob: ${config.rob}\nforward: ${config.forward}`);
       break;
     case config.revoke:
-      await revoke();
+      await wechat.revoke();
       break;
     default:
       if (config.forward) {
-        await forwardMsg(msg, roomId);
+        wechat.forwardMsgToRoom(msg);
       }
-  }
-}
-
-async function send (what, who) {
-  try {
-    let res = await bot.sendMsg(what, who);
-    lastMsg.id = res.MsgID;
-    lastMsg.who = who;
-  } catch (err) {
-    bot.emit('error', err);
-  }
-}
-
-async function forwardMsg (what, who) {
-  try {
-    let res = await bot.forwardMsg(what, who);
-    lastMsg.id = res.MsgID;
-    lastMsg.who = who;
-  } catch (err) {
-    bot.emit('error', err);
-  }
-}
-
-async function informMe (msg) {
-  for (let i = 0; i < config.informTimes; i++) {
-    await send(msg, myId);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-}
-
-async function revoke () {
-  try {
-    return bot.revokeMsg(lastMsg.id, lastMsg.who);
-  } catch (err) {
-    bot.emit('error', err);
   }
 }

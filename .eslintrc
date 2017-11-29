@@ -2,7 +2,8 @@
   "extends": "standard",
   "rules": {
     "semi": [2, "always"],
-    "camelcase": 0
+    "camelcase": 0,
+    "no-labels": 0
   },
   "parserOptions": {
     "ecmaVersion": 8,
