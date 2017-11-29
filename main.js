@@ -7,6 +7,10 @@ let bot;
 
 let roomId;
 let myId;
+let lastMsg = {
+  id: null,
+  who: null
+};
 
 try {
   bot = new Wechat(require('./data.json'));
@@ -52,7 +56,7 @@ bot.on('contacts-updated', contacts => {
 });
 
 bot.on('error', err => {
-  console.error(`${new Date()}错误：${err.message}`);
+  console.error(err.message);
 });
 
 bot.on('message', async msg => {
@@ -120,6 +124,9 @@ async function msgFromMe (msg) {
     case config.showStatus:
       await send(`rob: ${config.rob}\nforward: ${config.forward}`, myId);
       break;
+    case config.revoke:
+      await revoke();
+      break;
     default:
       if (config.forward) {
         await forwardMsg(msg, roomId);
@@ -129,7 +136,9 @@ async function msgFromMe (msg) {
 
 async function send (what, who) {
   try {
-    await bot.sendMsg(what, who);
+    let res = await bot.sendMsg(what, who);
+    lastMsg.id = res.MsgID;
+    lastMsg.who = who;
   } catch (err) {
     bot.emit('error', err);
   }
@@ -137,7 +146,9 @@ async function send (what, who) {
 
 async function forwardMsg (what, who) {
   try {
-    await bot.forwardMsg(what, who);
+    let res = await bot.forwardMsg(what, who);
+    lastMsg.id = res.MsgID;
+    lastMsg.who = who;
   } catch (err) {
     bot.emit('error', err);
   }
@@ -147,5 +158,13 @@ async function informMe (msg) {
   for (let i = 0; i < config.informTimes; i++) {
     await send(msg, myId);
     await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+}
+
+async function revoke () {
+  try {
+    return bot.revokeMsg(lastMsg.id, lastMsg.who);
+  } catch (err) {
+    bot.emit('error', err);
   }
 }

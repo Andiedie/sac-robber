@@ -1,8 +1,8 @@
 module.exports = {
   roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
   myName: '节能君',
-  include: [/甩.{0,3}第[一二三四五12345]班?$/],
-  exclude: ['换'],
+  include: [/甩.{0,3}第[一二三四五12345]/],
+  exclude: ['换', '吗', '?', '？', '有人'],
   // 接班语句集合
   jie: ['接', '接了', '接！', '接~', 'jie'],
   // 通知次数
@@ -16,5 +16,6 @@ module.exports = {
   endRob: 'no rob',
   startForward: 'forward',
   endForward: 'no forward',
-  showStatus: 'status'
+  showStatus: 'status',
+  revoke: '撤回'
 };
