@@ -54,6 +54,8 @@ bot.on('error', err => {
   console.error(err.message);
 });
 
+bot.setPollingTargetGetter(() => 60000);
+
 exports.onMsg = fn => {
   bot.on('message', (msg) => {
     msg.IsMe = () => msg.FromUserName === myId;
