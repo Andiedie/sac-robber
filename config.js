@@ -1,6 +1,6 @@
 module.exports = {
-  //roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
-  roomName: 'test',
+  roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
+  // roomName: 'test',
   myName: '节能君',
   // 接班语句集合
   jie: ['接', '接了', '接！', '接~', 'jie'],
