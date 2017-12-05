@@ -4,7 +4,7 @@ const config = require('./config');
 const level = [
   {
     include: [/甩.{0,3}第[一二三四五12345]/],
-    exclude: ['换', '吗', '?', '？', '私戳'],
+    exclude: ['换', '吗', '?', '？', '私戳', /周[一二三四五12345]第[一二三123]/, '请', '不'],
     action: async msg => {
       if (config.rob) {
         const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
@@ -18,7 +18,7 @@ const level = [
   },
   {
     include: [/第[一二三四五]/],
-    exclude: ['换', '私戳'],
+    exclude: ['换', '私戳', /周[一二三四五12345]第[一二三123]/],
     action: async msg => {
       await wechat.sendToMe(msg.Content);
     }
@@ -39,25 +39,17 @@ async function msgFromGroup (msg) {
   let action;
   outer: for (const one of level) {
     for (let condition of one.include) {
-      if (condition instanceof RegExp) {
-        if (!condition.test(msg.Content)) {
-          continue outer;
-        }
-      } else if (typeof condition === 'string') {
-        if (!msg.Content.includes(condition)) {
-          continue outer;
-        }
+      if (condition instanceof RegExp && !condition.test(msg.Content)) {
+        continue outer;
+      } else if (typeof condition === 'string' && !msg.Content.includes(condition)) {
+        continue outer;
       }
     }
     for (let condition of one.exclude) {
-      if (condition instanceof RegExp) {
-        if (condition.test(msg.Content)) {
-          continue outer;
-        }
-      } else if (typeof condition === 'string') {
-        if (msg.Content.includes(condition)) {
-          continue outer;
-        }
+      if (condition instanceof RegExp && condition.test(msg.Content)) {
+        continue outer;
+      } else if (typeof condition === 'string' && msg.Content.includes(condition)) {
+        continue outer;
       }
     }
     action = one.action;

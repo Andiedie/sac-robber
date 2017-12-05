@@ -1,12 +1,13 @@
 module.exports = {
-  roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
+  //roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
+  roomName: 'test',
   myName: '节能君',
   // 接班语句集合
   jie: ['接', '接了', '接！', '接~', 'jie'],
   // 是否自动抢班
-  rob: false,
+  rob: true,
   // 是否转发消息到群
-  forward: false,
+  forward: true,
   // 开启或关闭功能的微信消息
   startRob: 'rob',
   endRob: 'no rob',
