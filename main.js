@@ -4,7 +4,7 @@ const config = require('./config');
 const level = [
   {
     include: [/甩.{0,3}第[一二三四五12345]/],
-    exclude: ['换', '吗', '?', '？', '私戳', /周[一二三四五12345]第[一二三123]/, '请', '不'],
+    exclude: ['换', '吗', '?', '？', '私戳', /周[一二三四五12345]第[一二三123]/, '请', '不', '昨天'],
     action: async msg => {
       if (config.rob) {
         const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
@@ -18,7 +18,7 @@ const level = [
   },
   {
     include: [/第[一二三四五]/],
-    exclude: ['换', '私戳', /周[一二三四五12345]第[一二三123]/],
+    exclude: ['换', '私戳', /周[一二三四五12345]第[一二三123]/, '昨天'],
     action: async msg => {
       await wechat.sendToMe(msg.Content);
     }
