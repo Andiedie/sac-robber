@@ -39,7 +39,7 @@ bot.on('logout', () => {
 
 bot.on('contacts-updated', contacts => {
   for (const one of contacts) {
-    if (one.NickName === config.roomName && roomId !== one.UserName) {
+    if (one.NickName && one.NickName.includes(config.roomName) && roomId !== one.UserName) {
       roomId = one.UserName;
       console.log('更新群ID为：', roomId);
     }

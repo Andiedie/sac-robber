@@ -1,9 +1,8 @@
 module.exports = {
-  roomName: 'SAC_ 欢迎小鲜肉(｡･ω･｡)',
-  // roomName: 'test',
+  roomName: 'SAC',
   myName: '节能君',
   // 接班语句集合
-  jie: ['接', '接了', '接！', '接~', 'jie'],
+  jie: ['接', '接了', '接！', '接~', 'jie', '要了', '收了'],
   // 是否自动抢班
   rob: true,
   // 是否转发消息到群
