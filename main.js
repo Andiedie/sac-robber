@@ -9,6 +9,7 @@ const level = [
       if (config.rob) {
         const randomJie = config.jie[Math.floor(Math.random() * config.jie.length)];
         await wechat.sendToRoom(randomJie);
+        config.rob = false;
       }
       for (let i = 0; i < 5; i++) {
         await wechat.sendToMe(msg.Content);
@@ -35,7 +36,7 @@ wechat.onMsg(async msg => {
   }
 });
 
-async function msgFromGroup (msg) {
+async function msgFromGroup(msg) {
   let action;
   outer: for (const one of level) {
     for (let condition of one.include) {
@@ -60,7 +61,7 @@ async function msgFromGroup (msg) {
   }
 }
 
-async function msgFromMe (msg) {
+async function msgFromMe(msg) {
   switch (msg.Content) {
     case config.startRob:
       config.rob = true;
